@@ -82,13 +82,18 @@ CHANNEL_LAYERS = {
 }
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': "postgres",
+        'USER': "postgres.kwqhnifuvnwghpbwgswt",
+        'PASSWORD': "Pankaj@526254",
+        'HOST':"aws-0-ap-southeast-1.pooler.supabase.com",
+        'PORT': "5432",
     }
 }
+
+
 
 
 # Password validation
@@ -131,3 +136,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+SESSION_SAVE_EVERY_REQUEST = True
