@@ -12,10 +12,14 @@ django_application = get_asgi_application()
 
 
 ws_patterns = [
-    path('ws/chat/',TestConsumer.as_asgi())
+    # path('ws/chat/',TestConsumer.as_asgi())
+    path('chat/<room_code>',ChatConsumer.as_asgi()),
 ]
 
-application = ProtocolTypeRouter({
-    # 'http': django_application,
-'websocket':URLRouter(ws_patterns)
-})
+application = ProtocolTypeRouter(
+    {
+    'websocket':URLRouter(ws_patterns)
+    }
+)
+
+
