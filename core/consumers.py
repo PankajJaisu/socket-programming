@@ -31,18 +31,23 @@ class TestConsumer(WebsocketConsumer):
         # Remove the consumer from the group when the WebSocket is closed
         print('disconnect::')
 
+
+
+active_users = {} 
 class ChatConsumer(WebsocketConsumer):
     def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_code']
         # self.group_name = 'room_%s' % self.room_name
         self.group_name = f'room_{self.room_name}' 
+        self.user_id = self.room_name
+
         async_to_sync(self.channel_layer.group_add)(
             self.group_name,
             self.channel_name
         )
 
         self.accept()
-        # data = {'type':'connected'}
+       
 
         async_to_sync(self.channel_layer.group_send)(
             f'room_{self.room_name}',{
@@ -54,6 +59,9 @@ class ChatConsumer(WebsocketConsumer):
         self.send(text_data=json.dumps({
             'payload':'connected'
         }))
+
+        active_users.setdefault(self.user_id, [])
+
     def receive(self,text_data):
         data = json.loads(text_data)
         payload = {'message':data.get('message'),'sender':data.get('sender')}
@@ -64,8 +72,12 @@ class ChatConsumer(WebsocketConsumer):
                 'value':json.dumps(payload)
             }
         )
+        active_users[self.user_id].append(data.get('message'))
+        print("\n\n active_user::",active_users)
+
     def disconnect(self,close_code):
-        pass
+        active_users.pop(self.user_id, None)
+        print(active_users)
 
     def send_message(self,text_data):
         print(type(text_data))
@@ -73,3 +85,13 @@ class ChatConsumer(WebsocketConsumer):
         self.send(text_data=json.dumps({
             'payload':data
         }))
+
+    async def fetch_messages(self, event):
+
+        # Send stored messages to the user upon connection
+
+        messages = active_users.get(self.user_id, [])
+
+        await self.send(text_data=json.dumps({'type': 'chat.messages', 'messages': messages}))
+
+
